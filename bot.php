@@ -14,7 +14,6 @@ function head(){
 	"user-agent: ".$user,
 	"cookie: ".$cookie
 	];
-	
 }
 function host(){
 	return "http://bankrollclicks.xyz";
@@ -37,12 +36,11 @@ function dash(){
 function ptc(){
 	$url=host()."/ptc";
 	$r = Run($url,head());
-	$id = explode("'",explode('/view/',$r)[1])[0];
-	return $id;
+	return $r;
 }
 function view($id){
 	$url=host()."/ptc/view/".$id;
-	return Run($url,head());
+	return Run($url,array_merge(head(),array("refferer: ".$url)));
 }
 function verif($csrf,$token,$id){
 	$url=host()."/ptc/verify/".$id;
@@ -110,13 +108,17 @@ while(true){
 	}
 }
 ptc:
+$nom=1;
 while(true){
-	$id=ptc();
+	$r=ptc();
+	$link=explode('</h5>',explode('<h5 class="card-title">',$r)[$nom])[0];
+	$id = explode("'",explode('/view/',$r)[$nom])[0];
 	if($id){
 		$r2=view($id);
 		$tmr=explode(';',explode('var timer=',$r2)[1])[0];
 		$csrf=explode('">',explode('name="csrf_token_name" value="',$r2)[1])[0];
 	    $token=explode('">',explode('<input type="hidden" name="token" value="',$r2)[1])[0];
+		echo col('Visit ~> ','k').col($link,'b')."\n";
 	    tmr($tmr);
 
 	    $r3=verif($csrf,$token,$id);
@@ -126,13 +128,14 @@ while(true){
 	    	echo col("Balance ~> ","h").col(dash()[1],"k")."\n";
 	    	line();
 	    }else{
-	    	echo "\r";
-	    	echo col("Invalid Captcha","m");sleep(2);echo "\r";
+	    	echo col("Link Error","m");sleep(2);echo "\n";line();
+			$nom=$nom+1;
 	    }
 	}else{
 		echo col('Ptc habis','m')."\n";line();goto menu;
 	}
 }
+
 function Run($url, $httpheader = 0, $post = 0, $proxy = 0){$ch = curl_init();curl_setopt($ch, CURLOPT_URL, $url);curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);curl_setopt($ch, CURLOPT_COOKIE,TRUE);
 	//curl_setopt($ch, CURLOPT_COOKIEFILE,"cookie.txt");curl_setopt($ch, CURLOPT_COOKIEJAR,"cookie.txt");
 	if($post){curl_setopt($ch, CURLOPT_POST, true);curl_setopt($ch, CURLOPT_POSTFIELDS, $post);}if($httpheader){curl_setopt($ch, CURLOPT_HTTPHEADER, $httpheader);}if($proxy){curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, true);curl_setopt($ch, CURLOPT_PROXY, $proxy);}curl_setopt($ch, CURLOPT_HEADER, true);$response = curl_exec($ch);$httpcode = curl_getinfo($ch);if(!$httpcode) return "Curl Error : ".curl_error($ch); else{$header = substr($response, 0, curl_getinfo($ch, CURLINFO_HEADER_SIZE));$body = substr($response, curl_getinfo($ch, CURLINFO_HEADER_SIZE));curl_close($ch);return array($header, $body)[1];}}
