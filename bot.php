@@ -14,9 +14,18 @@ function head(){
 	"user-agent: ".$user,
 	"cookie: ".$cookie
 	];
+	
 }
 function host(){
 	return "http://bankrollclicks.xyz";
+}
+function login(){
+	$url=host()."/login";
+	return Run($url,head());
+}
+function auth($csrf,$email,$pass){
+	$url=host()."/auth/login";
+	http_build_query(["csrf_token_name"=>$csrf,"email"=>$email,"password"=>$pass,"captcha"=>"recaptchav2","g-recaptcha-response"=>""]);
 }
 function dash(){
 	$url=host()."/dashboard";
@@ -46,7 +55,7 @@ function faucet(){
 }
 function vfaucet($bot1,$bot2,$bot3,$csrf,$token){
 	$url=host()."/faucet/verify";
-	$data="antibotlinks=+".$bot2."+".$bot3."+".$bot1."&csrf_token_name=".$csrf."&token=".$token."&captcha=recaptchav2&g-recaptcha-response=";
+	$data="antibotlinks=+".$bot1."+".$bot2."+".$bot3."&csrf_token_name=".$csrf."&token=".$token."&captcha=recaptchav2&g-recaptcha-response=";
 	return Run($url,head(),$data);
 }
 cookie:
@@ -74,7 +83,7 @@ while(true){
 	$r1=faucet();
 	$left=explode('/',explode('<p class="lh-1 mb-1 font-weight-bold">',$r1)[3])[0];
 	if($left=='0'){
-		echo col('you reach max claim! come back tomorrow','m').$n.$line;
+		echo col('you reach max claim! come back tomorrow','m')."\n";line();
 		goto menu;
 	}
 	$leftt=$left-1;
@@ -82,6 +91,7 @@ while(true){
 	if($tmr){
 		tmr($tmr);goto faucet;
 	}
+	sleep(10);
 	echo col('bypasss','k');
 	$bot=explode('" rel=\"',$r1);
 	$bot1=explode('\"',$bot[1])[0];
@@ -98,9 +108,7 @@ while(true){
 		echo "\r";
 	    echo col("Invalid Captcha","m");sleep(2);echo "\r";
 	}
-	
 }
-
 ptc:
 while(true){
 	$id=ptc();
